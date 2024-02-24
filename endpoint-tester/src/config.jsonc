@@ -1,0 +1,10 @@
+{
+	"endPoints": [
+		"ws://127.0.0.1:9944",
+		"wss://testnet-rpc1.cess.cloud/ws/"
+	],
+	"connections": 3,
+	"txs": [
+		"query.timestamp.now()"
+	]
+}

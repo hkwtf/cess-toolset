@@ -11,15 +11,15 @@
     "rules": {
       "tags": ["recommended"],
       "include": ["ban-untagged-todo"],
-    },
-    "fmt": {
-      "useTabs": true,
-      "lineWidth": 100,
-      "indentWidth": 2,
-      "semiColons": true,
-      "singleQuote": true,
-      "proseWrap": "preserve",
-      "include": ["src/"],
     }
+  },
+  "fmt": {
+    "useTabs": true,
+    "lineWidth": 100,
+    "indentWidth": 2,
+    "semiColons": true,
+    "singleQuote": true,
+    "proseWrap": "preserve",
+    "include": ["src/"],
   }
 }

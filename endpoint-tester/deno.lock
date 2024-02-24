@@ -439,6 +439,8 @@
     "https://deno.land/std@0.217.0/dotenv/parse.ts": "a49ed243bd62ec26f38614042cda4e5e3a47b18337c93b0f9f8556a5c918884b",
     "https://deno.land/std@0.217.0/dotenv/stringify.ts": "0047ad7068289735d08964046aea267a750c141b494ca0e38831b89be6c020c2",
     "https://deno.land/std@0.217.0/fmt/colors.ts": "d239d84620b921ea520125d778947881f62c50e78deef2657073840b8af9559a",
+    "https://deno.land/std@0.217.0/jsonc/mod.ts": "82722888823e1af5a8f7918bf810ea581f68081064d529218533acad6cb7c2bc",
+    "https://deno.land/std@0.217.0/jsonc/parse.ts": "747a0753289fdbfcb9cb86b709b56348c98abc107fbb0a7f350b87af4425a76a",
     "https://deno.land/x/polkadot@0.2.45/api-derive/accounts/accountId.ts": "777fefccc5447f1d683de8df4f08d872a5d1bfc04d3b535d6e4582c48f7ad1a0",
     "https://deno.land/x/polkadot@0.2.45/api-derive/accounts/flags.ts": "666c139e01289d66c9f19e47aff1a18997218dec95026769610fbc7874519195",
     "https://deno.land/x/polkadot@0.2.45/api-derive/accounts/idAndIndex.ts": "bedc6c217cd2466000ebc8438a0a479752f12bf4aebd63183645e970c190a527",
