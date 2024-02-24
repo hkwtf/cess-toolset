@@ -1,23 +1,44 @@
-import { load } from '$std/dotenv/mod.ts';
-import { parse } from '$std/jsonc/mod.ts';
-import { ApiPromise, WsProvider } from '$polkadot-js/api/mod.ts';
+import { parse } from "$std/jsonc/mod.ts";
+import { ApiPromise, WsProvider } from "$polkadot-js/api/mod.ts";
 
-const config = parse(await Deno.readTextFile('./src/config.jsonc'));
+async function sendTxsToApi(api: ApiPromise, txs) {
+  let lastResult;
+  for (const txStr of txs) {
+    if (typeof txStr === "string") {
+      const segs = txStr.split(".");
+      const txObj = segs.reduce((txObj, seg) => txObj[seg], api);
+      lastResult = await txObj.call();
+    }
+  }
+  return lastResult;
+}
 
-const { endPoints, connections, txs } = config;
+async function main() {
+  const config = parse(await Deno.readTextFile("./src/config.jsonc"));
 
-const connArr = endPoints.reduce(
-	(memo, ep) => memo.concat([...Array(connections).keys()].map(() => ep)),
-	[],
-);
+  const { endPoints, connections, txs } = config;
 
-const apiPromises = connArr.map((ep) => ApiPromise.create({ provider: new WsProvider(ep) }));
-const apis = await Promise.allSettled(apiPromises);
+  const connArr = endPoints.reduce(
+    (memo, ep) => memo.concat([...Array(connections).keys()].map(() => ep)),
+    [],
+  );
 
-// Issuing the same requests
-apis.forEach((api) => {
-	// NS> formuate a tx from a txt script to executable toward an endpoints.
-	// NS> you can also time the txs when the result is included with tx receipts.
-});
+  const apiPromises = connArr.map((ep) => ApiPromise.create({ provider: new WsProvider(ep) }));
+  let results = await Promise.allSettled(apiPromises);
 
-Deno.exit();
+  const apis = results.reduce((memo, res, idx) => {
+    if (res.status === "fulfilled") return memo.concat([res.value]);
+    console.log(`Connection rejected: ${connArr[idx]}`);
+    return memo;
+  }, []);
+
+  results = await Promise.allSettled(
+    apis.map((api) => sendTxsToApi(api, txs)),
+  );
+
+  console.log(`results:`, results);
+}
+
+main()
+  .catch((err) => console.error(err))
+  .finally(() => Deno.exit());
