@@ -1,13 +1,11 @@
 import { parse } from "$std/jsonc/mod.ts";
 import { ApiPromise, WsProvider } from "$polkadot-js/api/mod.ts";
 import { Keyring } from "$polkadot-js/keyring/mod.ts";
-import * as bnjs from "$bn.js";
 
 const APP_CONFIG = "./src/config.jsonc";
 const DEV_SEED_PHRASE = "bottom drive obey lake curtain smoke basket hold race lonely fit walk";
 const DEV_ACCTS = ["Alice", "Bob", "Charlie", "Dave", "Eve", "Fredie"];
 const API_PREFIX = "api";
-const BN = bnjs.BN;
 
 const config = parse(await Deno.readTextFile(APP_CONFIG));
 const keyring = new Keyring(config.keyring);
@@ -16,7 +14,7 @@ function getTxCall(api: ApiPromise, txStr: string): Function {
   const segs = txStr.split(".");
   return segs.reduce(
     (txCall, seg, idx) => idx === 0 && seg === API_PREFIX ? txCall : txCall[seg],
-    api
+    api,
   );
 }
 
@@ -25,7 +23,7 @@ function isWriteOp(txStr: string): boolean {
 }
 
 function transformParams(params: Array<string>) {
-  return params.map(param => {
+  return params.map((param) => {
     if (DEV_ACCTS.includes(param)) {
       const acct = keyring.addFromUri(`${DEV_SEED_PHRASE}//${param}`);
       return acct.address;
@@ -35,7 +33,17 @@ function transformParams(params: Array<string>) {
 }
 
 function transformResult(result) {
-  return result.toJSON();
+  if (typeof result === "object" && "toJSON" in result) {
+    return result.toJSON();
+  }
+  return result;
+}
+
+function getSigner(signerStr: string) {
+  if (DEV_ACCTS.includes(signerStr)) {
+    return keyring.addFromUri(`${DEV_SEED_PHRASE}//${signerStr}`);
+  }
+  return keyring.addFromUri(signerStr);
 }
 
 async function sendTxsToApi(api: ApiPromise, txs) {
@@ -46,17 +54,33 @@ async function sendTxsToApi(api: ApiPromise, txs) {
       txStr = tx;
       const txCall = getTxCall(api, tx);
       lastResult = await txCall.call(txCall);
-    } else {
-      const { params, sign } = tx;
+    } else if (!isWriteOp(tx.tx)) {
+      // tx is an Object but is a readOp
       txStr = tx.tx;
       const txCall = getTxCall(api, txStr);
-      const transformedParams = transformParams(params);
+      const transformedParams = transformParams(tx.params);
+      lastResult = await txCall.call(txCall, ...transformedParams);
+    } else {
+      // tx is a writeOp
+      txStr = tx.tx;
+      const txCall = getTxCall(api, txStr);
+      const transformedParams = transformParams(tx.params);
+      const signer = getSigner(tx.sign);
 
-      if (isWriteOp(txStr)) {
-        // lastResult is block hash. It hasn't been put in block or finalized yet
-        lastResult = await txCall.call(txCall, ...transformedParams).signAndSend(sign);
+      if (!config.writeTxWait || config.writeTxWait === "none") {
+        const txReceipt = await txCall.call(txCall, ...transformedParams).signAndSend(signer);
+        lastResult = `txReceipt: ${txReceipt}`;
       } else {
-        lastResult = await txCall.call(txCall, ...transformedParams);
+        lastResult = await new Promise((resolve, reject) => {
+          txCall.call(txCall, ...transformedParams).signAndSend(signer, (res) => {
+            if (config.writeTxWait === "inBlock" && res.status.isInBlock) {
+              resolve(`inBlock: ${res.status.asInBlock}`);
+            }
+            if (config.writeTxWait === "finalized" && res.status.isFinalized) {
+              resolve(`finalized: ${res.status.asFinalized}`);
+            }
+          });
+        });
       }
     }
     lastResult = transformResult(lastResult);
@@ -87,5 +111,5 @@ async function main() {
 }
 
 main()
-  .catch((err) => console.error(err))
+  .catch(console.error)
   .finally(() => Deno.exit());
