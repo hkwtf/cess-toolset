@@ -2,6 +2,7 @@
   "imports": {
     "$std/": "https://deno.land/std@0.217.0/",
     "$polkadot-js/": "https://deno.land/x/polkadot@0.2.45/",
+    "$bn.js": "npm:bn.js@5.2.1",
   },
   "tasks": {
     "start": "deno run -A src/main.ts"
