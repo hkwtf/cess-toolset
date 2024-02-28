@@ -15,3 +15,4 @@ int-to-bytes/.yarn/*
 int-to-bytes/node_modules
 
 .env
+**/node_modules

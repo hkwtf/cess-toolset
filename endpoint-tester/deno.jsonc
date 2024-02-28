@@ -1,10 +1,22 @@
 {
   "imports": {
-    "$std/": "https://deno.land/std@0.217.0/",
-    "$polkadot-js/": "https://deno.land/x/polkadot@0.2.45/",
+    "std/": "https://deno.land/std@0.217.0/",
+    "polkadot-js/": "https://deno.land/x/polkadot@0.2.45/",
+    "async-mutex": "npm:async-mutex@0.4.1",
   },
   "tasks": {
-    "start": "deno run -A src/main.ts"
+    "dev": "deno run -A --inspect-brk src/main.ts",
+    "start": "deno run -A --check src/main.ts",
+    "build": "deno compile --allow-net src/main.ts",
+    "validate": "deno check src/main.ts && deno fmt --check && deno lint"
+  },
+  "compilerOptions": {
+    "strict": true,
+    "target": "es2022",
+    "checkJs": true,
+    "types": [
+      "src/types.d.ts",
+    ]
   },
   "lint": {
     "include": ["src/"],
@@ -21,5 +33,6 @@
     "singleQuote": false,
     "proseWrap": "preserve",
     "include": ["src/"],
-  }
+  },
+  "nodeModulesDir": true,
 }
