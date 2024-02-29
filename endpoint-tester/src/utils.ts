@@ -21,6 +21,10 @@ export function transformParams(keyring: Keyring, params: Array<TxParam>) {
   });
 }
 
+// This function works on polkadot-js api type. It is quite complicated with the dynamic type
+//   fetched on-chain.
+//   ref: https://polkadot.js.org/docs/api/start/types.basics
+// deno-lint-ignore no-explicit-any
 export function transformResult(result: any): any {
   if (typeof result === "object" && "toJSON" in result) {
     return result.toJSON();

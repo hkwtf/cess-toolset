@@ -2,10 +2,10 @@ import { parse } from "std/jsonc/mod.ts";
 import { ApiPromise, WsProvider } from "polkadot-js/api/mod.ts";
 import { Keyring } from "polkadot-js/keyring/mod.ts";
 import { Mutex, withTimeout } from "async-mutex";
-import type { KeyringPair } from "polkadot-js/keyring/types.ts";
 import type { ISubmittableResult } from "polkadot-js/types/types/index.ts";
 
 // Our own implementation
+import { UserNonces } from "./userNonces.ts";
 import { getSigner, isWriteOp, transformParams, transformResult } from "./utils.ts";
 import type { AppConfig, Tx } from "./types.ts";
 
@@ -18,8 +18,9 @@ const keyring = new Keyring(config.keyring);
 // For keeping track of user nonce when spitting out txs
 // The mutex in 5 sec.
 const mutex = withTimeout(new Mutex(), 5000, new Error("mutex timeout"));
-const userNonces: Map<string, number> = new Map();
+const userNonces = new UserNonces();
 
+// deno-lint-ignore no-explicit-any
 function getTxCall(api: ApiPromise, txStr: string): any {
   const segs = txStr.split(".");
   return segs.reduce(
@@ -30,25 +31,6 @@ function getTxCall(api: ApiPromise, txStr: string): any {
     (txCall, seg, idx) => idx === 0 && seg === API_PREFIX ? txCall : txCall[seg],
     api,
   );
-}
-
-function userNonceKey(api: ApiPromise, signer: KeyringPair): string {
-  const rt = api.runtimeVersion;
-  return `${rt.specName}-${rt.specVersion}/${signer.address}`;
-}
-
-function setUserNonce(api: ApiPromise, signer: KeyringPair, nonce: number): void {
-  const key = userNonceKey(api, signer);
-  userNonces.set(key, nonce);
-}
-
-async function getUserNonce(api: ApiPromise, signer: KeyringPair): Promise<number> {
-  const key = userNonceKey(api, signer);
-  if (userNonces.has(key)) return userNonces.get(key) as number;
-
-  const nonce = await api.rpc.system.accountNextIndex(signer.address) as unknown as number;
-  setUserNonce(api, signer, nonce);
-  return nonce;
 }
 
 async function sendTxsToApi(api: ApiPromise, txs: Array<Tx>) {
@@ -79,34 +61,38 @@ async function sendTxsToApi(api: ApiPromise, txs: Array<Tx>) {
 
       const signer = getSigner(keyring, tx.sign);
 
+      // lock the mutex
       const release = await mutex.acquire();
-      let nonce = await getUserNonce(api, signer);
+      const nonce = await userNonces.nextUserNonce(api, signer);
 
       console.log(`user: ${signer.address}, nonce: ${nonce}`);
 
       if (!config.writeTxWait || config.writeTxWait === "none") {
-        const txReceipt = await txCall.call(txCall, ...transformedParams).signAndSend(signer, {
-          nonce: nonce++,
-        });
-        setUserNonce(api, signer, nonce);
+        const txReceipt = await txCall
+          .call(txCall, ...transformedParams)
+          .signAndSend(signer, { nonce });
 
+        // release the mutex
+        release();
         lastResult = `txReceipt: ${txReceipt}`;
       } else {
         lastResult = await new Promise((resolve, reject) => {
-          txCall.call(txCall, ...transformedParams).signAndSend(
-            signer,
-            { nonce: nonce++ },
-            (res: ISubmittableResult) => {
-              if (config.writeTxWait === "inBlock" && res.status.isInBlock) {
+          const unsub = txCall
+            .call(txCall, ...transformedParams)
+            .signAndSend(signer, { nonce }, (res: ISubmittableResult) => {
+              if (config.writeTxWait === "inBlock" && res.isInBlock) {
+                unsub();
                 resolve(`inBlock: ${res.status.asInBlock}`);
               }
-              if (config.writeTxWait === "finalized" && res.status.isFinalized) {
+              if (config.writeTxWait === "finalized" && res.isFinalized) {
+                unsub();
                 resolve(`finalized: ${res.status.asFinalized}`);
               }
-            },
-          );
-
-          setUserNonce(api, signer, nonce);
+              if (res.isError) {
+                unsub();
+                reject(`error: ${res.dispatchError}`);
+              }
+            });
         });
       }
     }

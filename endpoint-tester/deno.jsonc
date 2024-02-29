@@ -12,10 +12,9 @@
   },
   "compilerOptions": {
     "strict": true,
-    "target": "es2022",
     "checkJs": true,
     "types": [
-      "src/types.d.ts",
+      "src/types.ts",
     ]
   },
   "lint": {

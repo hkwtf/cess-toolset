@@ -10,7 +10,7 @@
     // "wss://testnet-rpc1.cess.cloud/ws/",
     // "wss://rpc.polkadot.io"
   ],
-  "connections": 2,
+  "connections": 1,
   "txs": [
     "api.query.timestamp.now",
     {
