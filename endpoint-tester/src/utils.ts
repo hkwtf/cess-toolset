@@ -43,3 +43,13 @@ export function getSigner(keyring: Keyring, signerStr: string): KeyringPair {
   }
   return keyring.addFromUri(signerStr);
 }
+
+export function txDisplay(tx: Tx): string {
+  const em = "🔗";
+  if (typeof tx === "string") return `${em} ${tx}()`;
+
+  const paramsStr = tx.params ? tx.params.join(", ") : "";
+
+  if (!tx.sign) return `${em} ${tx.tx}(${paramsStr})`;
+  return `${em} ${tx.tx}(${paramsStr}) | ✍️  ${tx.sign}`;
+}

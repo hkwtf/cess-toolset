@@ -6,7 +6,7 @@ import type { ISubmittableResult } from "polkadot-js/types/types/index.ts";
 
 // Our own implementation
 import { UserNonces } from "./userNonces.ts";
-import { getSigner, isWriteOp, transformParams, transformResult } from "./utils.ts";
+import * as utils from "./utils.ts";
 import type { AppConfig, Tx } from "./types.ts";
 
 const APP_CONFIG_PATH = "./src/config.jsonc";
@@ -42,24 +42,28 @@ async function sendTxsToApi(api: ApiPromise, txs: Array<Tx>) {
       txStr = tx;
       const txCall = getTxCall(api, tx);
       lastResult = await txCall.call(txCall);
-    } else if (!isWriteOp(tx)) {
+    } else if (!utils.isWriteOp(tx)) {
       // tx is an Object but is a readOp
       txStr = tx.tx;
       const txCall = getTxCall(api, txStr);
-      const transformedParams = Array.isArray(tx.params) ? transformParams(keyring, tx.params) : [];
+      const transformedParams = Array.isArray(tx.params)
+        ? utils.transformParams(keyring, tx.params)
+        : [];
 
       lastResult = await txCall.call(txCall, ...transformedParams);
     } else {
       // tx is a writeOp
       txStr = tx.tx;
       const txCall = getTxCall(api, txStr);
-      const transformedParams = Array.isArray(tx.params) ? transformParams(keyring, tx.params) : [];
+      const transformedParams = Array.isArray(tx.params)
+        ? utils.transformParams(keyring, tx.params)
+        : [];
 
       if (!tx.sign || tx.sign.length === 0) {
         throw new Error(`${txStr} writeOp has no signer specified.`);
       }
 
-      const signer = getSigner(keyring, tx.sign);
+      const signer = utils.getSigner(keyring, tx.sign);
 
       // lock the mutex
       const release = await mutex.acquire();
@@ -100,8 +104,8 @@ async function sendTxsToApi(api: ApiPromise, txs: Array<Tx>) {
         });
       }
     }
-    lastResult = transformResult(lastResult);
-    console.log(`${txStr}\n  L`, lastResult);
+    lastResult = utils.transformResult(lastResult);
+    console.log(`${utils.txDisplay(tx)}\n  L`, lastResult);
   }
 
   return lastResult;
