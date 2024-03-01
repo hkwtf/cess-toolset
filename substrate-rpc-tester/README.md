@@ -12,6 +12,10 @@ deno task start
 
 It will use the current [`config.ts`](./src/config.ts) for the connections and transaction scripts.
 
+Loom Video Demonstration:
+
+<div style="position: relative; padding-bottom: 63.38028169014085%; height: 0;"><iframe src="https://www.loom.com/embed/4440ff6d68a8437d80890817d5823021?sid=d1919904-b327-4ad9-9ad3-9faf93741527" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe></div>
+
 ## Configuration
 
 An example of the config is as follows:
