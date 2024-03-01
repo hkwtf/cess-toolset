@@ -18,3 +18,5 @@ export interface AppConfig {
   connections: number;
   txs: Tx[];
 }
+
+export type TimingRecord = Record<string, number>;
