@@ -1,5 +1,14 @@
 # Substrate RPC Tester
 
+<div>
+  <a href="https://www.loom.com/share/4440ff6d68a8437d80890817d5823021">
+    <p>Substrate RPC Tester 视频讲解🎥 - Watch Video</p>
+  </a>
+  <a href="https://www.loom.com/share/4440ff6d68a8437d80890817d5823021">
+    <img style="max-width:300px;" src="https://cdn.loom.com/sessions/thumbnails/4440ff6d68a8437d80890817d5823021-with-play.gif">
+  </a>
+</div>
+
 This tool connects to a series of Substrate RPC endpoints and sending a script of transactions to these endpoints.
 
 To run the tester, you have to [install Deno](https://docs.deno.com/runtime/manual/getting_started/installation).
@@ -11,10 +20,6 @@ deno task start
 ```
 
 It will use the current [`config.ts`](./src/config.ts) for the connections and transaction scripts.
-
-Loom Video Demonstration:
-
-<div style="position: relative; padding-bottom: 63.38028169014085%; height: 0;"><iframe src="https://www.loom.com/embed/4440ff6d68a8437d80890817d5823021?sid=d1919904-b327-4ad9-9ad3-9faf93741527" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe></div>
 
 ## Configuration
 
