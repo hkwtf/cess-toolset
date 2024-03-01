@@ -8,7 +8,7 @@
   "tasks": {
     "dev": "deno run --allow-net --allow-env --inspect-brk src/main.ts",
     "start": "deno run --allow-net --allow-env --check src/main.ts",
-    "build": "deno compile --check --allow-net --allow-env --output rpc-tester src/main.ts",
+    "build": "deno compile --check --allow-net --allow-env --output substrate-rpc-tester src/main.ts",
     "validate": "deno check src/main.ts && deno fmt --check && deno lint"
   },
   "compilerOptions": {

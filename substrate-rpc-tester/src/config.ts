@@ -23,20 +23,20 @@ const Config: AppConfig = {
       // Alice transfers to Bob
       tx: "api.tx.balances.transfer",
       params: ["Bob", 12345],
-      sign: "Alice",
+      signer: "Alice",
     },
     {
       // Bob transfers back to Alice
       tx: "api.tx.balances.transfer",
       params: ["Alice", 12345],
-      sign: "Bob",
+      signer: "Bob",
     },
     {
       // Alice adding Bob as proxy
       tx: "api.tx.proxy.addProxy",
       // (address, Staking type, BlockNumber)
       params: ["Bob", "Staking", 16],
-      sign: "Alice",
+      signer: "Alice",
     },
   ],
 };

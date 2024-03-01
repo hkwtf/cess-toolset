@@ -51,15 +51,9 @@ export function txDisplay(tx: Tx): string {
 
   const paramsStr = tx.params ? tx.params.join(", ") : "";
 
-  if (!tx.sign) return `${em} ${tx.tx}(${paramsStr})`;
-  return `${em} ${tx.tx}(${paramsStr}) | ✍️  ${tx.sign}`;
+  if (!tx.signer) return `${em} ${tx.tx}(${paramsStr})`;
+  return `${em} ${tx.tx}(${paramsStr}) | ✍️  ${tx.signer}`;
 }
-
-const style = {
-  mainTitle: "color: green;background: yellow; font-weight: bold; display: block",
-  catTitle: "color: blue",
-  body: "color: white",
-};
 
 export function displayTimingReport(timings: TimingRecord): void {
   const log = console.log;
@@ -70,8 +64,8 @@ export function displayTimingReport(timings: TimingRecord): void {
   const valF = chalk.whiteBright;
 
   const displayStartEnd = (timings: TimingRecord, key: string) => {
-    log(`  ${keyF("takes")}: ${valF(timings[key + "End"] - timings[key + "Start"])}`);
-  }
+    log(`  ${keyF("time taken")}: ${valF(timings[key + "End"] - timings[key + "Start"])}`);
+  };
 
   log();
   log(mainTitle("--- Timing Report ---"));

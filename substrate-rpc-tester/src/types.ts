@@ -3,7 +3,7 @@ export type TxParam = string | number;
 export interface TxObj {
   tx: string;
   params?: Array<TxParam>;
-  sign?: string;
+  signer?: string;
 }
 
 export type Tx = string | TxObj;

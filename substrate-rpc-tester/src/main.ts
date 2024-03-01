@@ -55,11 +55,11 @@ async function sendTxsToApi(api: ApiPromise, txs: Array<Tx>) {
         ? utils.transformParams(keyring, tx.params)
         : [];
 
-      if (!tx.sign || tx.sign.length === 0) {
+      if (!tx.signer || tx.signer.length === 0) {
         throw new Error(`${txStr} writeOp has no signer specified.`);
       }
 
-      const signer = utils.getSigner(keyring, tx.sign);
+      const signer = utils.getSigner(keyring, tx.signer);
 
       // lock the mutex
       const release = await mutex.acquire();
