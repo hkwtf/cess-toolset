@@ -3,7 +3,7 @@ import chalk from "chalk";
 import type { KeyringPair } from "polkadot-js/keyring/types.ts";
 
 // Our own implementation
-import type { TimingRecord, Tx, TxParam } from "./types.ts";
+import type { Tx, TxParam } from "./types.ts";
 
 const API_PREFIX = "api";
 
@@ -91,23 +91,33 @@ export function stringify(
   return result.toString();
 }
 
-export function displayTimingReport(timings: TimingRecord): void {
-  const log = console.log;
-  const mainTitle = chalk.bold.yellowBright.inverse;
-  const catTitle = chalk.bgBlack.yellow;
-  const keyF = chalk.cyan;
-  const valF = chalk.whiteBright;
+export async function measurePerformance(name: string, fnPromise: () => Promise<unknown>) {
+  performance.mark(name);
+  await fnPromise();
+  performance.measure(name, name);
+}
 
-  const displayStartEnd = (timings: TimingRecord, key: string) => {
-    log(`  ${keyF("time taken")}: ${valF(timings[key + "End"] - timings[key + "Start"])}`);
-  };
+// For display
+const { log: display } = console;
+const mainTitle = chalk.bold.yellowBright.inverse;
+const catTitle = chalk.bgBlack.yellow;
+// const keyF = chalk.cyan;
+// const valF = chalk.whiteBright;
 
-  log();
-  log(mainTitle("--- Timing Report ---"));
+export function displayTxResults(conn: number, txResults: Map<number, string[]>) {
+  for (let idx = 0; idx < conn; idx++) {
+    display(mainTitle(`-- Connection ${idx + 1} --`));
 
-  log(catTitle("Connecting to all endpoints"));
-  displayStartEnd(timings, "allConn");
+    const res = txResults.get(idx);
+    if (res && res.length > 0) display(res.join("\n"));
+  }
+}
 
-  log(catTitle("Executing all transactions"));
-  displayStartEnd(timings, "allTxs");
+export function displayPerformance() {
+  display(mainTitle("-- Performance --"));
+
+  const measures = performance.getEntriesByType("measure");
+  for (const measure of measures) {
+    display(catTitle(measure.name), `start: ${measure.startTime}, duration: ${measure.duration}`);
+  }
 }
