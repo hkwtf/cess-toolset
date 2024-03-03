@@ -117,20 +117,31 @@ class SubstrateRpcTester {
         } else {
           lastResult = await new Promise((resolve, reject) => {
             let unsub: () => void;
+            const buf: string[] = [];
+
             txCall
               .call(txCall, ...transformedParams)
               .signAndSend(signer, { nonce }, (res: ISubmittableResult) => {
-                if (writeTxWait === "inblock" && res.isInBlock) {
-                  unsub();
-                  resolve(`inBlock: ${res.status.asInBlock}`);
+                const { status, txHash } = res;
+
+                if (res.isInBlock) {
+                  buf.push(`inBlock: ${status.asInBlock}}`);
+                  buf.push(`txHash: ${txHash.toHex()}`);
+
+                  if (writeTxWait === "inblock") {
+                    unsub();
+                    resolve(buf.join("\n"));
+                  }
                 }
-                if (writeTxWait === "finalized" && res.isFinalized) {
+                if (res.isFinalized && writeTxWait === "finalized") {
+                  buf.push(`finalized: ${status.asFinalized}`);
                   unsub();
-                  resolve(`finalized: ${res.status.asFinalized}`);
+                  resolve(buf.join("\n"));
                 }
                 if (res.isError) {
+                  buf.push(`error: ${res.dispatchError}`);
                   unsub();
-                  reject(`error: ${res.dispatchError}`);
+                  reject(buf.join("\n"));
                 }
               })
               .then((us: () => void) => (unsub = us));
