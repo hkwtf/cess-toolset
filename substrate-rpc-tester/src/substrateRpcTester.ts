@@ -3,6 +3,7 @@ import { Keyring } from "polkadot-js/keyring/mod.ts";
 import type { KeyringPair } from "polkadot-js/keyring/types.ts";
 import { Mutex, MutexInterface, withTimeout } from "async-mutex";
 import type { ISubmittableResult } from "polkadot-js/types/types/index.ts";
+import chalk from "chalk";
 
 import { AppConfig, Tx } from "./types.ts";
 import { UserNonces } from "./userNonces.ts";
@@ -125,23 +126,23 @@ class SubstrateRpcTester {
                 const { status, txHash } = res;
 
                 if (res.isInBlock) {
-                  buf.push(`inBlock: ${status.asInBlock}}`);
                   buf.push(`txHash: ${txHash.toHex()}`);
 
                   if (writeTxWait === "inblock") {
+                    buf.push(`block:  ${status.asInBlock}`);
                     unsub();
-                    resolve(buf.join("\n"));
+                    resolve(buf);
                   }
                 }
                 if (res.isFinalized && writeTxWait === "finalized") {
-                  buf.push(`finalized: ${status.asFinalized}`);
+                  buf.push(`fnl:    ${status.asFinalized}`);
                   unsub();
-                  resolve(buf.join("\n"));
+                  resolve(buf);
                 }
                 if (res.isError) {
-                  buf.push(`error: ${res.dispatchError}`);
+                  buf.push(`error:  ${res.dispatchError}`);
                   unsub();
-                  reject(buf.join("\n"));
+                  reject(buf);
                 }
               })
               .then((us: () => void) => (unsub = us));
@@ -154,19 +155,20 @@ class SubstrateRpcTester {
       lastResult = utils.transformResult(lastResult);
       this.appendExeLog(
         idx,
-        `${utils.txDisplay(tx)}\n  L ${JSON.stringify(lastResult, undefined, 2)}`,
+        `${utils.txDisplay(tx)}\n  L ${utils.stringify(lastResult, 4)}\n`,
       );
     }
   }
 
   displayReport() {
+    const { log: display } = console;
+    const mainTitle = chalk.bold.yellowBright.inverse;
+
     for (let idx = 0; idx < this.config.connections; idx++) {
-      console.log(`-- Connection ${idx + 1} --`);
+      display(mainTitle(`-- Connection ${idx + 1} --`));
+
       const res = this.txResults.get(idx);
-      if (res) {
-        console.log(res.join("\n"));
-      }
-      console.log();
+      if (res && res.length > 0) display(res.join("\n"));
     }
   }
 }

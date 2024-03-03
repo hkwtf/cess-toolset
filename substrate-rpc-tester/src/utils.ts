@@ -59,18 +59,40 @@ export function getTxCall(api: ApiPromise, txStr: string): any {
 }
 
 export function txDisplay(tx: Tx): string {
+  const decorate = chalk.underline;
   const em = "🔗";
-  if (typeof tx === "string") return `${em} ${tx}()`;
+  let text: string;
 
-  const paramsStr = tx.params ? tx.params.join(", ") : "";
+  if (typeof tx === "string") {
+    text = `${tx}()`;
+  } else {
+    const paramsStr = tx.params ? tx.params.join(", ") : "";
+    text = !tx.signer ? `${tx.tx}(${paramsStr})` : `${tx.tx}(${paramsStr}) | ✍️  ${tx.signer}`;
+  }
+  return `${em} ${decorate(text)}`;
+}
 
-  if (!tx.signer) return `${em} ${tx.tx}(${paramsStr})`;
-  return `${em} ${tx.tx}(${paramsStr}) | ✍️  ${tx.signer}`;
+export function stringify(
+  result: string | number | boolean | object | Array<unknown>,
+  spacing: number = 0,
+): string {
+  if (Array.isArray(result)) {
+    if (result.length > 0 && typeof result[0] === "string") {
+      return result.join(`\n${" ".repeat(spacing)}`);
+    }
+    // an array of object or empty array
+    return JSON.stringify(result, undefined, 2);
+  }
+
+  if (typeof result === "object") {
+    return JSON.stringify(result, undefined, 2);
+  }
+
+  return result.toString();
 }
 
 export function displayTimingReport(timings: TimingRecord): void {
   const log = console.log;
-  // const mainTitle = chalk.bold.bgBlack.yellowBright.underline;
   const mainTitle = chalk.bold.yellowBright.inverse;
   const catTitle = chalk.bgBlack.yellow;
   const keyF = chalk.cyan;
