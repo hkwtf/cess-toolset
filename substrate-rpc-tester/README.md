@@ -2,7 +2,7 @@
 
 <div>
   <a href="https://www.loom.com/share/4440ff6d68a8437d80890817d5823021">
-    <p>Substrate RPC Tester 视频讲解🎥 - Watch Video</p>
+    <p>Substrate RPC Tester 视频讲解 🎥 - Watch Video</p>
   </a>
   <a href="https://www.loom.com/share/4440ff6d68a8437d80890817d5823021">
     <img style="max-width:300px;" src="https://cdn.loom.com/sessions/thumbnails/4440ff6d68a8437d80890817d5823021-with-play.gif">
