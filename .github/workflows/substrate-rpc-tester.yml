@@ -18,7 +18,11 @@ jobs:
           deno-version: ${{ matrix.deno }}
 
       - name: Validate application
-        run: deno task validate
+        run: |
+          cd substrate-rpc-tester
+          deno task validate
 
       - name: Build application
-        run: deno task build
+        run: |
+          cd substrate-rpc-tester
+          deno task build
