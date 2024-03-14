@@ -4,7 +4,7 @@
     "type": "sr25519",
     "ss58Format": 11330,
   },
-  "writeTxWait": "inblock",
+  "writeTxWait": "none",
   "connections": 2,
   "development": true,
   "signers": {

@@ -1,5 +1,5 @@
 {
-  "endPoint": "wss://testnet-rpc2.cess.cloud/ws",
+  "endPoint": "wss://testnet-rpc1.cess.cloud/ws/",
   "keyring": {
     "type": "sr25519",
     "ss58Format": 11330,
