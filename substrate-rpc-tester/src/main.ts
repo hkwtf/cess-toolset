@@ -1,7 +1,7 @@
 import { Command } from "commander";
 
 // Our own implementation
-import { AppConfig } from "./types.ts";
+import { AppConfig, AppOptions } from "./types.ts";
 import SubstrateRpcTester from "./substrateRpcTester.ts";
 import validateConfig from "./configSchema.ts";
 import * as jsonc from "std/jsonc/mod.ts";
@@ -15,7 +15,8 @@ function main() {
 
   program
     .argument("<config-path>", "path to a config file (jsonc format)")
-    .action(async (configPath, _opts) => {
+    .option("-v, --verbose", "verbose execution output", false)
+    .action(async (configPath, opts) => {
       const configTxt = await Deno.readTextFile(configPath);
       const config = jsonc.parse(configTxt);
 
@@ -25,7 +26,10 @@ function main() {
         Deno.exit(1);
       }
 
-      const substrateRpcTester = new SubstrateRpcTester(config as unknown as AppConfig);
+      const substrateRpcTester = new SubstrateRpcTester(
+        config as unknown as AppConfig,
+        opts as AppOptions,
+      );
       await substrateRpcTester.initialize();
       await substrateRpcTester.executeTxs();
 
